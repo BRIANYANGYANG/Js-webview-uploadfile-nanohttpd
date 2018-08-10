@@ -1,0 +1,36 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <script language="javascript">
+    var secs = 1; //倒计时的秒数
+    function Load(){
+    for(var i=secs;i>=0;i--)
+    {
+       window.setTimeout('doUpdate(' + i + ')', (secs-i) * 1000);
+    }
+    }
+    function doUpdate(num)
+    {
+    document.getElementById('ShowDiv').innerHTML = '将在'+num+'秒后返回' ;
+    if(num == 0) { history.go(-1); }
+    }
+
+    </script>
+</head>
+
+<style>
+    body{margin:50px}
+</style>
+
+
+<body onload="Load()">
+<h2>
+    RESULT
+</h2>
+<br/>
+<div id="ShowDiv"></div>
+<a href="#" onClick="javascript :history.go(-1);">立即返回</a>
+</body>
+</html>

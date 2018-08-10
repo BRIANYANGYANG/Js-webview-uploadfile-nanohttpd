@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.a0.alarmdisplayv1.creatfile.MainActivity">
+
+    <TextView
+        android:id="@+id/textview"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/image1" />
+
+    <ImageView
+        android:id="@+id/image1"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_above="@+id/btn_to_http" />
+
+    <Button
+        android:id="@+id/btn_to_scan1"
+        android:text="跳转扫描"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="152dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+    <Button
+        android:id="@+id/btn_to_http"
+        android:text="http_test"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_alignTop="@+id/btn_to_scan1"
+        android:layout_toEndOf="@+id/btn_to_scan1" />
+    <Button
+        android:id="@+id/recordbtn"
+        android:text="录音测试 down 触发 "
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:layout_alignBaseline="@+id/btn_to_http"
+        android:layout_alignBottom="@+id/btn_to_http"
+        android:layout_toEndOf="@+id/btn_to_http" />
+    <Button
+        android:id="@+id/recordbtn_clickstart"
+        android:text="录音测试 单击 触发开发 "
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/btn_to_scan1"
+        android:layout_alignStart="@+id/btn_to_scan1" />
+    <Button
+        android:id="@+id/recordbtn_clickstop"
+        android:text="录音测试 单击 触发停止 "
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_alignBaseline="@+id/recordbtn_clickstart"
+        android:layout_alignBottom="@+id/recordbtn_clickstart"
+        android:layout_toEndOf="@+id/recordbtn_clickstart" />
+    <Button
+        android:id="@+id/androidtojs"
+        android:text="androidtojs "
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/recordbtn"
+        android:layout_toEndOf="@+id/recordbtn_clickstop" />
+
+    <Button
+        android:id="@+id/uploadfile"
+        android:text="uploadfile "
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/recordbtn_clickstart"
+        android:layout_alignParentStart="true" />
+
+    <WebView
+        android:id="@+id/webview"
+        android:visibility="visible"
+        android:layout_width="300dp"
+        android:layout_height="150dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"></WebView>
+
+</RelativeLayout>
