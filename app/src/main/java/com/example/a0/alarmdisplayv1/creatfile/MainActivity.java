@@ -1,6 +1,8 @@
 package com.example.a0.alarmdisplayv1.creatfile;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
@@ -40,9 +42,14 @@ import org.xutils.x;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,6 +57,8 @@ import java.util.concurrent.Executors;
 import me.weyye.hipermission.HiPermission;
 import me.weyye.hipermission.PermissionCallback;
 import me.weyye.hipermission.PermissionItem;
+
+import static com.example.a0.alarmdisplayv1.creatfile.R.id.uploadfile;
 
 @ContentView(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity {
@@ -67,6 +76,12 @@ public class MainActivity extends AppCompatActivity {
     private volatile boolean isPlaying;
     //播放音频文件API
     private MediaPlayer mediaPlayer;
+
+    private String deviceIP;//本机ip
+    private int webServerPort = 8080;
+    private String upLoadFileName;
+
+    private String uploadFileServerIp;//目标上传服务器ip
 
 
     private Webserver webserver;
@@ -117,19 +132,22 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Event(value = R.id.uploadfile)
+    @Event(value = uploadfile)
     private void uploadFile(View view) {
         KLog.i("uploadFile");
         KLog.i(Thread.currentThread());
+        KLog.i("uploadFile", mAudioFile.getAbsolutePath());
 
-        File file = new File(Environment.getExternalStorageDirectory() + "/YPFaudio/1.m4a");
+        File file = new File(mAudioFile.getAbsolutePath());
         if (!file.exists()) {
-            KLog.d("file not exists");
+            KLog.e("file not exists");
         }
 
+        String uploadUrl = "http://" + uploadFileServerIp + "/uploadfile";
+        KLog.i(uploadUrl);
         OkHttpUtils.post()
-                .addFile("recfile", "rec_m4a", file)
-                .url("http://10.12.113.36:8080" + "/uploadfile")
+                .addFile("recfile" + mAudioFile.getName(), "fliename=" + mAudioFile.getName(), file)
+                .url(uploadUrl)
                 .build()
                 .execute(new StringCallback() {
                     @Override
@@ -140,6 +158,15 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         KLog.i(response);
+                        KLog.i(Thread.currentThread());
+
+                        Toast.makeText(getApplicationContext(), "上传完成OK " + mAudioFile.getName(), Toast.LENGTH_LONG);
+
+                        AlertDialog.Builder build = new AlertDialog.Builder(MainActivity.this);
+                        build.setTitle("上传完成" + mAudioFile.getName())
+                                .setPositiveButton("ok", null)
+                                .show();
+
                     }
                 });
 
@@ -224,14 +251,13 @@ public class MainActivity extends AppCompatActivity {
 
         InitWebview();
 
+        //android 6.0权限申请
         List<PermissionItem> permissionItems = new ArrayList<PermissionItem>();
         permissionItems.add(new PermissionItem(Manifest.permission.CAMERA));
         permissionItems.add(new PermissionItem(Manifest.permission.WRITE_EXTERNAL_STORAGE));
         permissionItems.add(new PermissionItem(Manifest.permission.READ_EXTERNAL_STORAGE));
         permissionItems.add(new PermissionItem(Manifest.permission.INTERNET));
         permissionItems.add(new PermissionItem(Manifest.permission.RECORD_AUDIO));
-
-
 
         HiPermission.create(this)
                 .permissions(permissionItems)
@@ -257,13 +283,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        webserver = new Webserver(getApplicationContext(), 8080);
+        webserver = new Webserver(getApplicationContext(), webServerPort);
         if (webserver.isAlive()) {
             webserver.stop();
         }
 
         try {
-            Thread.sleep(2*1000);
+            Thread.sleep(1*1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -286,8 +312,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
 //        生成二维码
-        Bitmap a = encodeAsBitmap("10.12.113.36:8080");
+        deviceIP = getIP(getApplicationContext());
+        String qCodeValue = deviceIP + ":" + webServerPort;
+        KLog.i(TAG, "qCodeValue=" + qCodeValue);
+        Bitmap a = encodeAsBitmap(qCodeValue);
         QCodeImageView.setImageBitmap(a);
 
 
@@ -363,8 +393,8 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 // ScanResult 为 获取到的字符串
                 String ScanResult = intentResult.getContents();
-                KLog.d(TAG, "ScanResult=" + ScanResult);
-
+                uploadFileServerIp = ScanResult;
+                KLog.i(TAG, "uploadFileServerIp=" + uploadFileServerIp);
                 Toast.makeText(this, "扫描成功" + ScanResult, Toast.LENGTH_LONG).show();
 
 
@@ -551,6 +581,27 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         //页面销毁，线程要关闭
         mExecutorService.shutdownNow();
+    }
+
+    public static String getIP(Context context){
+
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();)
+                {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress() && (inetAddress instanceof Inet4Address))
+                    {
+                        return inetAddress.getHostAddress().toString();
+                    }
+                }
+            }
+        }
+        catch (SocketException ex){
+            ex.printStackTrace();
+        }
+        return null;
     }
 
 }
